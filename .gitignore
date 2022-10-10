@@ -1,0 +1,4 @@
+pubspec_overrides.yaml
+.idea
+.vscode
+lcov.info

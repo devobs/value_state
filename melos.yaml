@@ -1,0 +1,14 @@
+name: value_state
+
+packages:
+  - packages/**
+
+command:
+  bootstrap:
+    usePubspecOverrides: true
+
+ide:
+  intellij:
+    enabled: false # set to false to override default and disable
+
+scripts:

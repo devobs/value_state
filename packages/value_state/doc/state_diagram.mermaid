@@ -1,0 +1,15 @@
+stateDiagram-v2
+  [*] --> WaitingState
+  state WaitingState {
+    InitState --> PendingState
+  }
+  WaitingState --> ReadyState
+  ReadyState --> PendingState
+  state ReadyState {
+    ValueState --> NoValueState
+    ValueState --> ErrorState
+    ErrorState --> NoValueState
+    ErrorState --> ValueState
+    NoValueState --> ValueState
+    NoValueState --> ErrorState
+  }

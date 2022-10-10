@@ -1,0 +1,52 @@
+classDiagram
+  class BaseState {
+    <<abstract>>
+  }
+  class WaitingState {
+    <<abstract>>
+  }
+  BaseState <|-- WaitingState
+  class InitState
+  WaitingState <|-- InitState
+  WaitingState <|-- PendingState
+  class ReadyState {
+    <<abstract>>
+    refreshing: bool
+    hasError: bool
+    hasValue: bool
+  }
+  BaseState <|-- ReadyState
+  class NoValueState {
+    hasError = false
+    hasValue = false
+  }
+  class ValueState {
+    value: T
+    hasError = false
+    hasValue = true
+  }
+  class ErrorState {
+    <<abstract>>
+    error: Object
+    stackTrace: StackTrace?
+    hasError = true
+  }
+  ReadyState <|-- NoValueState
+  ReadyState <|-- ValueState
+  ReadyState <|-- ErrorState
+  ErrorState "*" --> "1" BaseState : stateBeforeError
+  class ErrorWithValueState {
+    value: T
+    hasValue = true
+  }
+  class ErrorWithoutValueState {
+    hasValue = false
+  }
+  ErrorState <|-- ErrorWithValueState
+  ErrorState <|-- ErrorWithoutValueState
+  class WithValueState {
+    <<interface>>
+    value: T
+  }
+  WithValueState <|.. ValueState
+  WithValueState <|.. ErrorWithValueState

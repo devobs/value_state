@@ -1,0 +1,37 @@
+name: Test on packages
+
+on:
+  push:
+    paths:
+      - "packages/**"
+      - ".github/workflows/test.yml"
+
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+      - uses: bluefireteam/melos-action@v1
+
+      - name: Disable analytics
+        run: flutter config --no-analytics
+
+      - name: Install dependencies
+        run: melos exec flutter pub get
+
+      - name: Verify formatting
+        run: melos exec -c 1 -- "flutter format --output=none --set-exit-if-changed ."
+
+      - name: Analyze project source
+        run: melos exec -c 1 -- "flutter analyze --fatal-infos ."
+
+      - name: Run tests
+        run: melos exec flutter test --coverage --verbose test
+        
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
