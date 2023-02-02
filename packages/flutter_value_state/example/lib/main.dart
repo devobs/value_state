@@ -28,8 +28,8 @@ class MyApp extends StatelessWidget {
                         const Center(child: CircularProgressIndicator()),
                     builderError: (context, state) => Center(
                       child: Text('Expected error.',
-                          style:
-                              TextStyle(color: Theme.of(context).errorColor)),
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.error)),
                     ),
                     builderNoValue: (context, state) =>
                         const Center(child: Text('No value.')),
@@ -69,7 +69,7 @@ class MyHomePage extends StatelessWidget {
                         const Text('Counter value :'),
                         Text(
                           state.value.toString(),
-                          style: theme.textTheme.headline4,
+                          style: theme.textTheme.headlineMedium,
                         ),
                         const Spacer(),
                       ]),
