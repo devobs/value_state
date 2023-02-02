@@ -1,3 +1,7 @@
+## 1.2.3
+
+ - **FIX**: deprecation messages.
+
 ## 1.2.2
 
  - Update a dependency to the latest release.
