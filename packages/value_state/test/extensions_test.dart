@@ -2,30 +2,44 @@ import 'package:test/test.dart';
 import 'package:value_state/value_state.dart';
 
 void main() {
-  test('perform on $ValueState', () {
-    final stream =
-        const ValueState<int>(1).perform((state) async => const ValueState(2));
+  const myStr = 'My String';
+  group('toState()', () {
+    test('on a non null String', () {
+      expect(myStr.toState(), const ValueState(myStr));
+      expect(myStr.toState(refreshing: true),
+          const ValueState(myStr, refreshing: true));
+    });
+    test('on null', () {
+      const String? nullStr = null;
 
-    expect(
-        stream,
-        emitsInOrder([
-          const ValueState(1, refreshing: true),
-          const ValueState(2, refreshing: false),
-        ]));
+      expect(nullStr.toState(), const NoValueState<String>());
+      expect(nullStr.toState(refreshing: true),
+          const NoValueState<String>(refreshing: true));
+    });
   });
 
-  test('performStream on $ValueState', () {
-    final stream = const ValueState<int>(1).performStream((state) async* {
-      yield const ValueState(2);
-      yield const ValueState(3);
+  group('withValue', () {
+    String? modifier(String value) => '$value modified';
+
+    test('on a $ValueState', () {
+      final result = myStr.toState().withValue(modifier);
+
+      expect(result, modifier(myStr));
     });
 
-    expect(
-        stream,
-        emitsInOrder([
-          const ValueState(1, refreshing: true),
-          const ValueState(2, refreshing: false),
-          const ValueState(3, refreshing: false),
-        ]));
+    test('on a $ValueState', () {
+      final result = const InitState<String>().withValue(modifier);
+
+      expect(result, isNull);
+    });
+
+    test('expression on a $ValueState', () {
+      String? result;
+      myStr.toState().withValue((value) {
+        result = modifier(value);
+      });
+
+      expect(result, modifier(myStr));
+    });
   });
 }
