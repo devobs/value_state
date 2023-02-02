@@ -1,3 +1,7 @@
+## 1.2.2
+
+ - Update a dependency to the latest release.
+
 ## 1.2.0
 
 * Added pattern matching

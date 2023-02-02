@@ -14,10 +14,9 @@ dependencies:
 
   flutter_bloc: ^8.0.1
 
-  value_state: 1.2.0
-  flutter_value_state: 1.2.0
-  value_cubit: 1.2.0
-
+  value_state: 1.3.0
+  flutter_value_state: 1.2.1
+  value_cubit: 1.2.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
