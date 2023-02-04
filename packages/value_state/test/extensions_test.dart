@@ -3,6 +3,8 @@ import 'package:value_state/value_state.dart';
 
 void main() {
   const myStr = 'My String';
+  const myStrOrElse = 'My String orElse';
+
   group('toState()', () {
     test('on a non null String', () {
       expect(myStr.toState(), const ValueState(myStr));
@@ -18,19 +20,63 @@ void main() {
     });
   });
 
-  group('withValue', () {
-    String? modifier(String value) => '$value modified';
+  String? modifier(String value) => '$value modified';
 
+  group('withValue', () {
     test('on a $ValueState', () {
       final result = myStr.toState().withValue(modifier);
 
       expect(result, modifier(myStr));
     });
 
-    test('on a $ValueState', () {
+    test('on a $ValueState with onlyValueState to true', () {
+      final result = myStr.toState().withValue(modifier, onlyValueState: true);
+
+      expect(result, modifier(myStr));
+    });
+
+    test('on a $InitState', () {
       final result = const InitState<String>().withValue(modifier);
 
       expect(result, isNull);
+    });
+
+    test('on a $InitState with onlyValueState to true', () {
+      final result =
+          const InitState<String>().withValue(modifier, onlyValueState: true);
+
+      expect(result, isNull);
+    });
+
+    test('on a $ErrorState', () {
+      final result =
+          ErrorState<String>(error: 'Error', previousState: myStr.toState())
+              .withValue(modifier);
+
+      expect(result, modifier(myStr));
+    });
+
+    test('on a $ErrorState with onlyValueState to true', () {
+      final result =
+          ErrorState<String>(error: 'Error', previousState: myStr.toState())
+              .withValue(modifier, onlyValueState: true);
+
+      expect(result, isNull);
+    });
+
+    test('orElse on a $ValueState', () {
+      final result =
+          myStr.toState().withValue(modifier).orElse(() => myStrOrElse);
+
+      expect(result, modifier(myStr));
+    });
+
+    test('orElse on a $InitState', () {
+      final result = const InitState<String>()
+          .withValue(modifier)
+          .orElse(() => myStrOrElse);
+
+      expect(result, myStrOrElse);
     });
 
     test('expression on a $ValueState', () {
@@ -40,6 +86,22 @@ void main() {
       });
 
       expect(result, modifier(myStr));
+    });
+  });
+
+  group('whenValue', () {
+    test('on a $ValueState', () {
+      final result = myStr.toState().whenValue(modifier);
+
+      expect(result, modifier(myStr));
+    });
+
+    test('on a $ErrorState', () {
+      final result =
+          ErrorState<String>(error: 'Error', previousState: myStr.toState())
+              .whenValue(modifier);
+
+      expect(result, isNull);
     });
   });
 }

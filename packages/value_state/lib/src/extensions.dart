@@ -4,18 +4,44 @@ extension ObjectWithValueExtensions<T> on BaseState<T> {
   /// Shortcut on [BaseState] to handle easily [WithValueState] state. It can be used in different case :
   /// * To return a value
   /// ```dart
-  /// print('Phone number : ${personState.withValue((person) => person.phone) ?? 'unknown'}');
+  /// print('Phone number : ${personState.whenValue((person) => person.phone) ?? 'unknown'}');
   /// ```
   /// * To perform some action
   /// ```dart
-  /// personState.withValue((person) => print('Phone number : ${person.phone}'));
+  /// personState.whenValue((person) => print('Phone number : ${person.phone}'));
   /// ```
-  R? withValue<R>(R Function(T value) onValue) {
+  ///
+  /// If [onlyValueState] is true, then [withValue] is trigerred only on [ValueState] state.
+  R? withValue<R>(R Function(T value) onValue, {bool onlyValueState = false}) {
     final state = this;
-    if (state is WithValueState<T>) return onValue(state.value);
+
+    if (state is WithValueState<T>) {
+      if (!onlyValueState || !state.hasError) {
+        return onValue(state.value);
+      }
+    }
 
     return null;
   }
+
+  /// Shorcut to [withValue] with its parameter `onlyValueState` set to `true`. It is equivalent to handle only
+  /// [ValueState] state.
+  R? whenValue<R>(R Function(T value) onValue) =>
+      withValue<R>(onValue, onlyValueState: true);
+}
+
+extension OrExtensions<R> on R? {
+  /// Helpers to execute/return non null result on a null object.
+  ///
+  /// Example :
+  /// ```dart
+  /// personState.whenValue((person) {
+  ///   print('Phone number : ${person.phone}');
+  /// }).orElse(() {
+  ///   print('Phone number unknown');
+  /// });
+  /// ```
+  R orElse(R Function() elseAction) => this ?? elseAction();
 }
 
 extension ToReadyStateExtensions<T extends Object> on T? {
