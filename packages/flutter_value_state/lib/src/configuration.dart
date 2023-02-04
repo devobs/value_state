@@ -1,6 +1,13 @@
 import 'package:flutter/widgets.dart';
 import 'package:value_state/value_state.dart';
 
+Widget _onDefault<T>(BuildContext context, BaseState<T> state) =>
+    const SizedBox.shrink();
+
+Widget _defaultWrapper<T>(
+        BuildContext context, BaseState<T> state, Widget child) =>
+    child;
+
 typedef OnValueStateWaiting<T> = Widget Function(
     BuildContext context, WaitingState<T> state);
 
@@ -19,27 +26,27 @@ typedef OnValueStateWrapper<T> = Widget Function(
 /// [builderDefault] can be used when none of this callback is mentionned.
 class ValueStateConfigurationData {
   const ValueStateConfigurationData({
-    this.wrapper,
-    this.builderWaiting,
-    this.builderNoValue,
-    this.builderError,
-    this.builderDefault,
+    this.wrapper = _defaultWrapper,
+    this.builderWaiting = _onDefault,
+    this.builderNoValue = _onDefault,
+    this.builderError = _onDefault,
+    this.builderDefault = _onDefault,
   });
 
   /// Builder for all states that will be wrapped by this builder.
-  final OnValueStateWrapper? wrapper;
+  final OnValueStateWrapper wrapper;
 
   /// Builder for [WaitingState].
-  final OnValueStateWaiting? builderWaiting;
+  final OnValueStateWaiting builderWaiting;
 
   /// Builder for [NoValueState].
-  final OnValueStateNoValue? builderNoValue;
+  final OnValueStateNoValue builderNoValue;
 
   /// Builder for [ErrorState].
-  final OnValueStateError? builderError;
+  final OnValueStateError builderError;
 
   /// Fallback builder when one of the state builder is empty.
-  final OnValueStateDefault? builderDefault;
+  final OnValueStateDefault builderDefault;
 
   /// Creates a copy of this [ValueStateConfigurationData] but with the given
   /// fields replaced with the new values.

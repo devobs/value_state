@@ -60,7 +60,7 @@ class MyHomePage extends StatelessWidget {
           style: const TextStyle(fontSize: 24),
           textAlign: TextAlign.center,
           child: state.buildWidget(
-              (context, state, error) => Column(
+              onValue: (context, state, error) => Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         if (state.refreshing) const LinearProgressIndicator(),

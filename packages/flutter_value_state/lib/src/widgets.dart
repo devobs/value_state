@@ -3,32 +3,32 @@ import 'package:value_state/value_state.dart';
 
 import 'configuration.dart';
 
-Widget _onDefault<T>(BuildContext context, BaseState<T> state) =>
-    const SizedBox.shrink();
-
 extension StateConfigurationExtensions on BuildContext {
   ValueStateConfigurationData get stateConfiguration =>
-      ValueStateConfiguration.of(this);
+      ValueStateConfiguration.maybeOf(this) ??
+      const ValueStateConfigurationData();
 }
 
 extension ValueStateBuilderExtension<T> on BaseState<T> {
-  Widget buildWidget(
-    OnValueStateWithValue<T> onWithValue, {
+  Widget buildWidget({
     Key? key,
+    OnValueStateWithValue<T>? onValue,
     OnValueStateWaiting<T>? onWaiting,
     OnValueStateNoValue<T>? onNoValue,
     OnValueStateError<T>? onError,
     OnValueStateDefault<T>? onDefault,
     OnValueStateWrapper<T>? wrapper,
+    bool wrapped = true,
     bool valueMixedWithError = false,
   }) =>
       accept(_ValueStateBuilderVisitor<T>(
         onDefault: onDefault,
         onError: onError,
-        onWithValue: onWithValue,
+        onWithValue: onValue,
         onNoValue: onNoValue,
         onWaiting: onWaiting,
         valueMixedWithError: valueMixedWithError,
+        wrapped: wrapped,
         wrapper: wrapper,
       ));
 }
@@ -41,10 +41,11 @@ class _ValueStateBuilderVisitor<T> extends StateVisitor<Widget, T> {
     required this.onError,
     required this.onDefault,
     required this.wrapper,
+    required this.wrapped,
     required this.valueMixedWithError,
   });
 
-  final OnValueStateWithValue<T> onWithValue;
+  final OnValueStateWithValue<T>? onWithValue;
 
   final OnValueStateWaiting<T>? onWaiting;
 
@@ -53,19 +54,26 @@ class _ValueStateBuilderVisitor<T> extends StateVisitor<Widget, T> {
   final OnValueStateDefault<T>? onDefault;
   final OnValueStateWrapper<T>? wrapper;
 
+  final bool wrapped;
   final bool valueMixedWithError;
+
+  static Widget _unwrapped<T>(
+          BuildContext context, BaseState<T> state, Widget child) =>
+      child;
 
   Widget _builder(
     BaseState<T> state,
-    Widget? Function(BuildContext context,
-            ValueStateConfigurationData? valueStateConfiguration)
+    Widget Function(BuildContext context,
+            ValueStateConfigurationData valueStateConfiguration)
         builder,
   ) =>
       _StateBuilder(
-          state: state,
-          builder: builder,
-          onDefault: onDefault,
-          wrapper: wrapper);
+        state: state,
+        builder: builder,
+        onDefault: onDefault,
+        wrapper: wrapper ?? _unwrapped<T>,
+        wrapped: wrapped,
+      );
 
   @override
   Widget visitInitState(InitState<T> state) => _visitWaitingState(state);
@@ -76,18 +84,18 @@ class _ValueStateBuilderVisitor<T> extends StateVisitor<Widget, T> {
   Widget _visitWaitingState(WaitingState<T> state) =>
       _builder(state, (context, valueStateConfiguration) {
         final onWaiting =
-            this.onWaiting ?? valueStateConfiguration?.builderWaiting;
+            this.onWaiting ?? valueStateConfiguration.builderWaiting;
 
-        return onWaiting?.call(context, state);
+        return onWaiting(context, state);
       });
 
   @override
   Widget visitNoValueState(NoValueState<T> state) =>
       _builder(state, (context, valueStateConfiguration) {
         final onNoValue =
-            this.onNoValue ?? valueStateConfiguration?.builderNoValue;
+            this.onNoValue ?? valueStateConfiguration.builderNoValue;
 
-        return onNoValue?.call(context, state);
+        return onNoValue(context, state);
       });
 
   @override
@@ -100,22 +108,23 @@ class _ValueStateBuilderVisitor<T> extends StateVisitor<Widget, T> {
     }
 
     return _builder(state, (context, valueStateConfiguration) {
-      final onError = this.onError ?? valueStateConfiguration?.builderError;
+      final onError = this.onError ?? valueStateConfiguration.builderError;
 
-      return onError?.call(context, state);
+      return onError(context, state);
     });
   }
 
   Widget _visitWithValueState(WithValueState<T> state) =>
       _builder(state, (context, valueStateConfiguration) {
-        final onError = this.onError ?? valueStateConfiguration?.builderError;
+        final onError = this.onError ?? valueStateConfiguration.builderError;
         Widget? error;
 
         if (state is ErrorWithPreviousValue<T>) {
-          error = onError?.call(context, state);
+          error = onError(context, state);
         }
 
-        return onWithValue(context, state, error);
+        return onWithValue?.call(context, state, error) ??
+            valueStateConfiguration.builderDefault(context, state);
       });
 }
 
@@ -125,32 +134,26 @@ class _StateBuilder<T> extends StatelessWidget {
     required this.builder,
     required this.onDefault,
     required this.wrapper,
+    required this.wrapped,
   });
 
   final BaseState<T> state;
-  final Widget? Function(BuildContext context,
-      ValueStateConfigurationData? valueStateConfiguration) builder;
+  final Widget Function(BuildContext context,
+      ValueStateConfigurationData valueStateConfiguration) builder;
   final OnValueStateDefault<T>? onDefault;
-  final OnValueStateWrapper<T>? wrapper;
+  final OnValueStateWrapper<T> wrapper;
+
+  final bool wrapped;
 
   @override
   Widget build(BuildContext context) {
-    final valueStateConfiguration = ValueStateConfiguration.maybeOf(context);
-    Widget? child = builder(context, valueStateConfiguration);
+    final valueStateConfiguration = context.stateConfiguration;
+    Widget child = builder(context, valueStateConfiguration);
 
-    if (child == null) {
-      final localOnDefault =
-          onDefault ?? valueStateConfiguration?.builderDefault ?? _onDefault<T>;
-      child = localOnDefault(context, state);
-    }
+    child = wrapper(context, state, child);
 
-    final wrapBuilder =
-        wrapper ?? valueStateConfiguration?.wrapper ?? _defaultWrapper;
-
-    return wrapBuilder(context, state, child);
+    return wrapped
+        ? valueStateConfiguration.wrapper(context, state, child)
+        : child;
   }
-
-  Widget _defaultWrapper(
-          BuildContext context, BaseState<T> state, Widget child) =>
-      child;
 }
