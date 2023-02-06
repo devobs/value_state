@@ -72,7 +72,7 @@ mixin ValueCubitMixin<T> on BlocBase<BaseState<T>> {
   }
 }
 
-/// Execute [CubitValueStateMixin.perform] on each cubit of a list.
+/// Execute [ValueCubitMixin.perform] on each cubit of a list.
 /// Useful for cubits that are suscribed to others.
 @Deprecated('This feature will be dropped in 2.0.')
 Future<R> performOnIterable<R>(

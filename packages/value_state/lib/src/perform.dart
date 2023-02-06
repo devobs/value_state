@@ -11,7 +11,7 @@ typedef PerfomOnStateAction<T, R> = FutureOr<R> Function(
 /// [state] must return the state updated.
 /// If [errorAsState] is `true` and [action] raise an exception then an
 /// [ErrorState] is emitted. if `false`, nothing is emitted. The exception
-/// is always rethrown by [perform] to be handled by the caller.
+/// is always rethrown by [performOnState] to be handled by the caller.
 Future<R> performOnState<T, R>(
     {required BaseState<T> Function() state,
     required PerfomOnStateEmitter<T> emitter,
