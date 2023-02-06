@@ -4,11 +4,11 @@ extension ObjectWithValueExtensions<T> on BaseState<T> {
   /// Shortcut on [BaseState] to handle easily [WithValueState] state. It can be used in different case :
   /// * To return a value
   /// ```dart
-  /// print('Phone number : ${personState.whenValue((person) => person.phone) ?? 'unknown'}');
+  /// print('Phone number : ${personState.withValue((person) => person.phone) ?? 'unknown'}');
   /// ```
   /// * To perform some action
   /// ```dart
-  /// personState.whenValue((person) => print('Phone number : ${person.phone}'));
+  /// personState.withValue((person) => print('Phone number : ${person.phone}'));
   /// ```
   ///
   /// If [onlyValueState] is true, then [withValue] is trigerred only on [ValueState] state.
