@@ -16,7 +16,7 @@ dependencies:
 
   value_state: 1.4.1
   flutter_value_state: 1.3.1
-  value_cubit: 1.2.5
+  value_cubit: 1.3.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

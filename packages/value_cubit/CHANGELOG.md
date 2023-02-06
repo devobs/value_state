@@ -1,3 +1,7 @@
+## 1.3.0
+
+ - **FEAT**: added ValueCubitMixin.waitReady.
+
 ## 1.2.5
 
  - Update a dependency to the latest release.
