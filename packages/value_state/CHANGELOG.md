@@ -1,3 +1,7 @@
+## 1.4.1
+
+ - **DOCS**: fixed withValue naming.
+
 ## 1.4.0
 
  - **FEAT**: added orElse and whenValue.
