@@ -1,3 +1,7 @@
+## 1.3.0
+
+ - **FEAT**: added onValue and wrapper parameters.
+
 ## 1.2.2
 
  - **FIX**: deprecation messages.
