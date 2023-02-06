@@ -57,6 +57,19 @@ mixin ValueCubitMixin<T> on BlocBase<BaseState<T>> {
             emitter: emit,
             action: (state, emitter) => action()),
       );
+
+  /// Return `true` when a [ReadyState] is emitted.
+  /// Return `false` if this bloc is closed before a [ReadyState] is emitted.
+  Future<bool> waitReady() async {
+    if (state is! ReadyState<T>) {
+      final result = await stream.firstWhere((state) => state is ReadyState<T>,
+          orElse: () => PendingState<T>());
+
+      return result is ReadyState<T>;
+    }
+
+    return true;
+  }
 }
 
 /// Execute [CubitValueStateMixin.perform] on each cubit of a list.

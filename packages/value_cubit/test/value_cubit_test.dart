@@ -157,6 +157,28 @@ void main() {
     expect(errorStateWithValue1.hashCode, errorStateWithValue2.hashCode);
   });
 
+  test('waitReady', () async {
+    expect(counterCubit.state, isA<InitState<int>>());
+
+    counterCubit.refresh();
+
+    final result = await counterCubit.waitReady();
+
+    expect(result, isTrue);
+    expect(counterCubit.state, isA<ReadyState<int>>());
+  });
+
+  test('waitReady', () async {
+    expect(counterCubit.state, isA<InitState<int>>());
+
+    counterCubit.close();
+
+    final result = await counterCubit.waitReady();
+
+    expect(result, isFalse);
+    expect(counterCubit.state, isNot(isA<ReadyState<int>>()));
+  });
+
   test('visitor', () {
     const visitor = _TestStateVisitor();
 
