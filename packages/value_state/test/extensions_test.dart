@@ -104,4 +104,46 @@ void main() {
       expect(result, isNull);
     });
   });
+
+  group('toValue', () {
+    test('on a $ValueState', () {
+      final result = myStr.toState().toValue();
+
+      expect(result, myStr);
+    });
+
+    test('on a $ValueState with onlyValueState to true', () {
+      final result = myStr.toState().toValue(onlyValueState: true);
+
+      expect(result, myStr);
+    });
+
+    test('on a $InitState', () {
+      final result = const InitState<String>().toValue();
+
+      expect(result, isNull);
+    });
+
+    test('on a $InitState with onlyValueState to true', () {
+      final result = const InitState<String>().toValue(onlyValueState: true);
+
+      expect(result, isNull);
+    });
+
+    test('on a $ErrorState', () {
+      final result =
+          ErrorState<String>(error: 'Error', previousState: myStr.toState())
+              .toValue();
+
+      expect(result, myStr);
+    });
+
+    test('on a $ErrorState with onlyValueState to true', () {
+      final result =
+          ErrorState<String>(error: 'Error', previousState: myStr.toState())
+              .toValue(onlyValueState: true);
+
+      expect(result, isNull);
+    });
+  });
 }

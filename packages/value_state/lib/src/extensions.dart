@@ -28,6 +28,10 @@ extension ObjectWithValueExtensions<T> on BaseState<T> {
   /// [ValueState] state.
   R? whenValue<R>(R Function(T value) onValue) =>
       withValue<R>(onValue, onlyValueState: true);
+
+  /// Shorcut to [withValue] which return the value if avaible. [onlyValueState] is the same as [withValue].
+  T? toValue({bool onlyValueState = false}) =>
+      withValue((value) => value, onlyValueState: onlyValueState);
 }
 
 extension OrExtensions<R> on R? {
