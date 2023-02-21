@@ -42,8 +42,7 @@ Future<R> performOnState<T, R>(
 
 extension ValueStatePerformExtensions<T> on BaseState<T> {
   Stream<BaseState<T>> perform(
-      Future<BaseState<T>> Function(BaseState<T> state) action,
-      {bool errorAsState = true}) {
+      Future<BaseState<T>> Function(BaseState<T> state) action) {
     final controller = StreamController<BaseState<T>>();
     var lastState = this;
 
@@ -56,17 +55,17 @@ extension ValueStatePerformExtensions<T> on BaseState<T> {
       action: (state, emit) async {
         return emit(await action(state));
       },
-      errorAsState: errorAsState,
     ).then((_) {
       controller.close();
+    }).onError((error, stackTrace) {
+      // Will be raised in stream
     });
 
     return controller.stream;
   }
 
   Stream<BaseState<T>> performStream(
-      Stream<BaseState<T>> Function(BaseState<T> state) action,
-      {bool errorAsState = true}) {
+      Stream<BaseState<T>> Function(BaseState<T> state) action) {
     final controller = StreamController<BaseState<T>>();
     var lastState = this;
 
@@ -82,9 +81,10 @@ extension ValueStatePerformExtensions<T> on BaseState<T> {
 
         return subscription.asFuture();
       },
-      errorAsState: errorAsState,
     ).then((_) {
       controller.close();
+    }).onError((error, stackTrace) {
+      // Will be raised in stream
     });
 
     return controller.stream;
