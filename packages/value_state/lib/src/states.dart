@@ -13,6 +13,16 @@ abstract class BaseState<T> {
 
   /// Visitor pattern to safely enhance class capabilities
   R accept<R>(StateVisitor<R, T> visitor);
+
+  Map<String, dynamic> get _diagnosticableAttributes => {'fetching': fetching};
+
+  @override
+  String toString() {
+    return '$runtimeType${_prettyPrint(_diagnosticableAttributes)}';
+  }
+
+  static String _prettyPrint(Map<String, dynamic> attributes) =>
+      '(${attributes.entries.map((entry) => '${entry.key}: ${entry.value}').join(', ')})';
 }
 
 /// State for waiting value and there was no [ReadyState] before.
@@ -171,6 +181,12 @@ class ValueState<T> extends ReadyState<T> implements WithValueState<T> {
           value == other.value;
   @override
   int get hashCode => Object.hash(refreshing, value);
+
+  @override
+  Map<String, dynamic> get _diagnosticableAttributes => {
+        ...super._diagnosticableAttributes,
+        'value': value,
+      };
 }
 
 /// State for error (may be linked with a [ValueState] or not)
@@ -261,6 +277,14 @@ abstract class ErrorState<T> extends ReadyState<T> {
   @override
   int get hashCode =>
       Object.hash(refreshing, error, stackTrace, stateBeforeError);
+
+  @override
+  Map<String, dynamic> get _diagnosticableAttributes => {
+        ...super._diagnosticableAttributes,
+        'error': error,
+        if (stackTrace != null) 'stackTrace': stackTrace,
+        'stateBeforeError': stateBeforeError,
+      };
 }
 
 /// An error with a [ValueState] as previous state

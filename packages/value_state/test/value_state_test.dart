@@ -175,6 +175,34 @@ void main() {
             .accept(visitor),
         0);
   });
+
+  test('toString', () {
+    expect(const InitState<String>().toString(),
+        'InitState<String>(fetching: true)');
+
+    const pendingState = PendingState<String>();
+    expect(pendingState.toString(), 'PendingState<String>(fetching: true)');
+
+    expect(const NoValueState<String>().toString(),
+        'NoValueState<String>(fetching: false)');
+
+    const valueState = ValueState<String>('My value');
+
+    expect(valueState.toString(),
+        'ValueState<String>(fetching: false, value: ${valueState.value})');
+    expect(
+        ErrorState<String>(previousState: valueState, error: ArgumentError())
+            .toString(),
+        'ErrorWithPreviousValue<String>(fetching: false, error: Invalid argument(s), stateBeforeError: $valueState)');
+    expect(
+        ErrorState<String>(
+                previousState: pendingState,
+                error: ArgumentError(),
+                stackTrace: StackTrace.fromString('My StackTrace'))
+            .toString(),
+        'ErrorWithoutPreviousValue<String>(fetching: false, error: Invalid argument(s), stackTrace: My StackTrace, '
+        'stateBeforeError: $pendingState)');
+  });
 }
 
 class _TestStateVisitor extends StateVisitor<int, int> {
