@@ -1,3 +1,7 @@
+## 1.3.1
+
+ - **DOCS**: fix performOnState reference.
+
 ## 1.3.0
 
  - **FEAT**: added ValueCubitMixin.waitReady.

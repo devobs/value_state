@@ -1,3 +1,12 @@
+## 1.5.0
+
+ - **REFACTOR**: renamed to helpers.dart.
+ - **FIX**: exception in BaseState.perform.
+ - **FEAT**: added toFutureState and toStates extensions.
+ - **FEAT**: added pretty print to states.
+ - **FEAT**: added toValue.
+ - **DOCS**: fix performOnState reference.
+
 ## 1.4.1
 
  - **DOCS**: fixed withValue naming.
