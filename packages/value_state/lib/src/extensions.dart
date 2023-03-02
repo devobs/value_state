@@ -1,7 +1,8 @@
+import 'perform.dart';
 import 'states.dart';
 
 extension ObjectWithValueExtensions<T> on BaseState<T> {
-  /// Shortcut on [BaseState] to handle easily [WithValueState] state. It can be used in different case :
+  /// Shortcut on [BaseState] to easily handle [WithValueState] state. It can be used in different case :
   /// * To return a value
   /// ```dart
   /// print('Phone number : ${personState.withValue((person) => person.phone) ?? 'unknown'}');
@@ -58,4 +59,18 @@ extension ToReadyStateExtensions<T extends Object> on T? {
         ? NoValueState<T>(refreshing: refreshing)
         : ValueState<T>(state, refreshing: refreshing);
   }
+}
+
+extension FutureValueStateExtension<T> on Future<T?> {
+  /// Map a [Future] to [ReadyState] : [NoValueState] or [ValueState].
+  Future<ReadyState<T>> toFutureState({bool refreshing = false}) async {
+    final result = await this;
+
+    if (result == null) return NoValueState(refreshing: refreshing);
+    return ValueState(result, refreshing: refreshing);
+  }
+
+  /// Generate a stream of [BaseState] during a processing [Future].
+  Stream<BaseState<T>> toStates() =>
+      InitState<T>().perform((_) => toFutureState());
 }

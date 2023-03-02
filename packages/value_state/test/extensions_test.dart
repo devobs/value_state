@@ -146,4 +146,24 @@ void main() {
       expect(result, isNull);
     });
   });
+
+  test('toFutureState', () {
+    const value = 'Result';
+
+    expect(Future.value(value).toFutureState(), completion(value.toState()));
+    expect(Future<String?>.value(null).toFutureState(),
+        completion(const NoValueState<String>()));
+  });
+
+  test('toStates', () {
+    const value = 'Result';
+
+    expect(
+        Future.value(value).toStates(),
+        emitsInOrder([
+          const PendingState<String>(),
+          const ValueState(value),
+          emitsDone,
+        ]));
+  });
 }

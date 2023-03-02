@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import '../value_state.dart';
+import 'states.dart';
 
 typedef PerfomOnStateEmitter<T> = FutureOr<void> Function(BaseState<T> state);
 typedef PerfomOnStateAction<T, R> = FutureOr<R> Function(
