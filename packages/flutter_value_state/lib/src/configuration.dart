@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:value_state/value_state.dart';
 
-Widget _onDefault<T>(BuildContext context, BaseState<T> state) =>
+Widget _defaultBuilder<T>(BuildContext context, BaseState<T> state) =>
     const SizedBox.shrink();
 
 Widget _defaultWrapper<T>(
@@ -26,27 +26,36 @@ typedef OnValueStateWrapper<T> = Widget Function(
 /// [builderDefault] can be used when none of this callback is mentionned.
 class ValueStateConfigurationData {
   const ValueStateConfigurationData({
-    this.wrapper = _defaultWrapper,
-    this.builderWaiting = _onDefault,
-    this.builderNoValue = _onDefault,
-    this.builderError = _onDefault,
-    this.builderDefault = _onDefault,
-  });
+    OnValueStateWrapper? wrapper,
+    OnValueStateWaiting? builderWaiting,
+    OnValueStateNoValue? builderNoValue,
+    OnValueStateError? builderError,
+    OnValueStateDefault? builderDefault,
+  })  : _wrapper = wrapper,
+        _builderWaiting = builderWaiting,
+        _builderNoValue = builderNoValue,
+        _builderError = builderError,
+        _builderDefault = builderDefault;
 
   /// Builder for all states that will be wrapped by this builder.
-  final OnValueStateWrapper wrapper;
+  OnValueStateWrapper get wrapper => _wrapper ?? _defaultWrapper;
+  final OnValueStateWrapper? _wrapper;
 
   /// Builder for [WaitingState].
-  final OnValueStateWaiting builderWaiting;
+  OnValueStateWaiting get builderWaiting => _builderWaiting ?? builderDefault;
+  final OnValueStateWaiting? _builderWaiting;
 
   /// Builder for [NoValueState].
-  final OnValueStateNoValue builderNoValue;
+  OnValueStateNoValue get builderNoValue => _builderNoValue ?? builderDefault;
+  final OnValueStateNoValue? _builderNoValue;
 
   /// Builder for [ErrorState].
-  final OnValueStateError builderError;
+  OnValueStateError get builderError => _builderError ?? builderDefault;
+  final OnValueStateError? _builderError;
 
   /// Fallback builder when one of the state builder is empty.
-  final OnValueStateDefault builderDefault;
+  OnValueStateDefault get builderDefault => _builderDefault ?? _defaultBuilder;
+  final OnValueStateDefault? _builderDefault;
 
   /// Creates a copy of this [ValueStateConfigurationData] but with the given
   /// fields replaced with the new values.
@@ -73,11 +82,11 @@ class ValueStateConfigurationData {
         configuration ?? const ValueStateConfigurationData();
 
     return baseConfiguration.copyWith(
-      wrapper: wrapper,
-      builderWaiting: builderWaiting,
-      builderNoValue: builderNoValue,
-      builderError: builderError,
-      builderDefault: builderDefault,
+      wrapper: _wrapper,
+      builderWaiting: _builderWaiting,
+      builderNoValue: _builderNoValue,
+      builderError: _builderError,
+      builderDefault: _builderDefault,
     );
   }
 
