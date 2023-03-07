@@ -1,3 +1,7 @@
+## 1.3.4
+
+ - **FIX**: onDefault not triggered.
+
 ## 1.3.3
 
  - **FIX**: ValueStateConfiguration merge broken.
