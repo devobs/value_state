@@ -63,8 +63,11 @@ class _ValueStateBuilderVisitor<T> extends StateVisitor<Widget, T> {
 
   Widget _builder(
     BaseState<T> state,
-    Widget Function(BuildContext context,
-            ValueStateConfigurationData valueStateConfiguration)
+    Widget Function(
+      BuildContext context,
+      ValueStateConfigurationData valueStateConfiguration,
+      OnValueStateDefault<T>? onDefault,
+    )
         builder,
   ) =>
       _StateBuilder(
@@ -82,18 +85,20 @@ class _ValueStateBuilderVisitor<T> extends StateVisitor<Widget, T> {
   Widget visitPendingState(PendingState<T> state) => _visitWaitingState(state);
 
   Widget _visitWaitingState(WaitingState<T> state) =>
-      _builder(state, (context, valueStateConfiguration) {
-        final onWaiting =
-            this.onWaiting ?? valueStateConfiguration.builderWaiting;
+      _builder(state, (context, valueStateConfiguration, onDefault) {
+        final onWaiting = this.onWaiting ??
+            onDefault ??
+            valueStateConfiguration.builderWaiting;
 
         return onWaiting(context, state);
       });
 
   @override
   Widget visitNoValueState(NoValueState<T> state) =>
-      _builder(state, (context, valueStateConfiguration) {
-        final onNoValue =
-            this.onNoValue ?? valueStateConfiguration.builderNoValue;
+      _builder(state, (context, valueStateConfiguration, onDefault) {
+        final onNoValue = this.onNoValue ??
+            onDefault ??
+            valueStateConfiguration.builderNoValue;
 
         return onNoValue(context, state);
       });
@@ -107,16 +112,18 @@ class _ValueStateBuilderVisitor<T> extends StateVisitor<Widget, T> {
       return _visitWithValueState(state);
     }
 
-    return _builder(state, (context, valueStateConfiguration) {
-      final onError = this.onError ?? valueStateConfiguration.builderError;
+    return _builder(state, (context, valueStateConfiguration, onDefault) {
+      final onError =
+          this.onError ?? onDefault ?? valueStateConfiguration.builderError;
 
       return onError(context, state);
     });
   }
 
   Widget _visitWithValueState(WithValueState<T> state) =>
-      _builder(state, (context, valueStateConfiguration) {
-        final onError = this.onError ?? valueStateConfiguration.builderError;
+      _builder(state, (context, valueStateConfiguration, onDefault) {
+        final onError =
+            this.onError ?? onDefault ?? valueStateConfiguration.builderError;
         Widget? error;
 
         if (state is ErrorWithPreviousValue<T>) {
@@ -124,6 +131,7 @@ class _ValueStateBuilderVisitor<T> extends StateVisitor<Widget, T> {
         }
 
         return onWithValue?.call(context, state, error) ??
+            onDefault?.call(context, state) ??
             valueStateConfiguration.builderDefault(context, state);
       });
 }
@@ -138,8 +146,11 @@ class _StateBuilder<T> extends StatelessWidget {
   });
 
   final BaseState<T> state;
-  final Widget Function(BuildContext context,
-      ValueStateConfigurationData valueStateConfiguration) builder;
+  final Widget Function(
+    BuildContext context,
+    ValueStateConfigurationData valueStateConfiguration,
+    OnValueStateDefault<T>?,
+  ) builder;
   final OnValueStateDefault<T>? onDefault;
   final OnValueStateWrapper<T> wrapper;
 
@@ -148,7 +159,7 @@ class _StateBuilder<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final valueStateConfiguration = context.stateConfiguration;
-    Widget child = builder(context, valueStateConfiguration);
+    Widget child = builder(context, valueStateConfiguration, onDefault);
 
     child = wrapper(context, state, child);
 

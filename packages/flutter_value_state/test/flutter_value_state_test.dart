@@ -23,6 +23,7 @@ class _TestWidget<T extends BaseState<int>> extends StatelessWidget {
     this.onDefault,
     this.wrapper,
     this.wrapped = true,
+    this.onValueEnabled = true,
   });
 
   final T state;
@@ -37,18 +38,21 @@ class _TestWidget<T extends BaseState<int>> extends StatelessWidget {
   final OnValueStateWrapper<dynamic>? wrapper;
 
   final bool wrapped;
+  final bool onValueEnabled;
 
   @override
   Widget build(BuildContext context) {
     return state.buildWidget(
-      onValue: (context, state, error) {
-        return Column(
-          children: [
-            if (error != null) error,
-            child ?? const SizedBox.shrink(key: _buildWidgetKey),
-          ],
-        );
-      },
+      onValue: onValueEnabled
+          ? (context, state, error) {
+              return Column(
+                children: [
+                  if (error != null) error,
+                  child ?? const SizedBox.shrink(key: _buildWidgetKey),
+                ],
+              );
+            }
+          : null,
       valueMixedWithError: valueMixedWithError,
       onDefault: onDefault,
       onError: onError,
@@ -73,6 +77,7 @@ class _TestConfigurationWidget<T extends BaseState<int>>
     this.onDefault,
     this.wrapper,
     this.wrapped = true,
+    this.onValueEnabled = true,
   });
 
   final T state;
@@ -87,6 +92,7 @@ class _TestConfigurationWidget<T extends BaseState<int>>
   final OnValueStateWrapper<dynamic>? wrapper;
 
   final bool wrapped;
+  final bool onValueEnabled;
 
   @override
   State<_TestConfigurationWidget<T>> createState() =>
@@ -130,6 +136,7 @@ class _TestConfigurationWidgetState<T extends BaseState<int>>
           onWaiting: widget.onWaiting,
           wrapper: widget.wrapper,
           wrapped: widget.wrapped,
+          onValueEnabled: widget.onValueEnabled,
         ));
   }
 }
@@ -248,12 +255,29 @@ void main() {
           previousState: const InitState<int>(),
           error: 'Error',
           refreshing: false): _errorWidgetKey,
+      ErrorState<int>(
+          previousState: 0.toState(),
+          error: 'Error',
+          refreshing: false): _errorWidgetKey,
     }.entries) {
       testWidgets('build with ${state.key.runtimeType}', (tester) async {
         await tester.pumpWidget(_TestConfigurationWidget(state: state.key));
 
         expect(find.byKey(state.value), findsOneWidget);
         expect(find.byType(_defaultWidgetType), findsOneWidget);
+      });
+
+      testWidgets('build with ${state.key.runtimeType} and onDefault',
+          (tester) async {
+        await tester.pumpWidget(_TestConfigurationWidget(
+          state: state.key,
+          onDefault: (context, state) => Container(key: _defaultWidgetKey),
+          valueMixedWithError: true,
+          onValueEnabled: false,
+        ));
+
+        expect(find.byKey(state.value), findsNothing);
+        expect(find.byKey(_defaultWidgetKey), findsOneWidget);
       });
     }
 
@@ -282,6 +306,7 @@ void main() {
 
         expect(find.byKey(state.value), findsOneWidget);
         expect(find.byKey(wrapperKey), findsOneWidget);
+        expect(find.byKey(_defaultWidgetKey), findsNothing);
         expect(find.byType(_defaultWidgetType), findsNothing);
         expect(find.byType(Container), findsOneWidget);
         expect(find.byType(Center), findsOneWidget);
@@ -303,6 +328,7 @@ void main() {
 
         expect(find.byKey(state.value), findsOneWidget);
         expect(find.byKey(wrapperKey), findsOneWidget);
+        expect(find.byKey(_defaultWidgetKey), findsNothing);
         expect(find.byType(_defaultWidgetType), findsNothing);
         expect(find.byType(Container), findsOneWidget);
         expect(find.byType(Center), findsOneWidget);
