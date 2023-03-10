@@ -4,7 +4,9 @@ import 'states.dart';
 
 typedef PerfomOnStateEmitter<T> = FutureOr<void> Function(BaseState<T> state);
 typedef PerfomOnStateAction<T, R> = FutureOr<R> Function(
-    BaseState<T> state, PerfomOnStateEmitter<T> emitter);
+  BaseState<T> state,
+  PerfomOnStateEmitter<T> emitter,
+);
 
 /// Handle states (waiting, refreshing, error...) while an [action] is
 /// processed.
@@ -55,10 +57,10 @@ extension ValueStatePerformExtensions<T> on BaseState<T> {
       action: (state, emit) async {
         return emit(await action(state));
       },
-    ).then((_) {
+    ).onError((error, stackTrace) {
+      // Will be raised in stream as [ErrorState]
+    }).whenComplete(() {
       controller.close();
-    }).onError((error, stackTrace) {
-      // Will be raised in stream
     });
 
     return controller.stream;
@@ -75,16 +77,15 @@ extension ValueStatePerformExtensions<T> on BaseState<T> {
         lastState = state;
         controller.add(state);
       },
-      action: (state, emit) {
+      action: (state, emit) async {
         final stream = action(this);
-        final subscription = stream.listen(emit);
 
-        return subscription.asFuture();
+        await stream.forEach(emit);
       },
-    ).then((_) {
+    ).onError((error, stackTrace) {
+      // Will be raised in stream as [ErrorState]
+    }).whenComplete(() {
       controller.close();
-    }).onError((error, stackTrace) {
-      // Will be raised in stream
     });
 
     return controller.stream;
