@@ -1,3 +1,7 @@
+## 1.5.1
+
+ - **FIX**: close stream in perform.
+
 ## 1.5.0
 
  - **REFACTOR**: renamed to helpers.dart.
