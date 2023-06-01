@@ -54,7 +54,11 @@ mixin ValueCubitMixin<T> on BlocBase<BaseState<T>> {
       _performValueCubitLock.synchronized<R>(
         () => performOnState<T, R>(
             state: () => state,
-            emitter: emit,
+            emitter: (state) {
+              if (!isClosed) {
+                emit(state);
+              }
+            },
             action: (state, emitter) => action()),
       );
 
