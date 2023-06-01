@@ -1,3 +1,7 @@
+## 1.3.6
+
+ - **FIX**: buildWidget with child class as value.
+
 ## 1.3.5
 
  - Update a dependency to the latest release.
