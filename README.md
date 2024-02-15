@@ -1,4 +1,4 @@
-A dart package that helps to implement basic states for [Flutter](https://flutter.dev/) and/or [BLoC library](https://pub.dev/packages/bloc) to perform, load and fetch data.
+A dart package that helps to implement basic states for [Flutter](https://flutter.dev/) to load and fetch data.
 
 
 [![Test](https://github.com/devobs/value_state/actions/workflows/test.yml/badge.svg)](https://github.com/devobs/value_state/actions/workflows/test.yml)
@@ -11,8 +11,6 @@ A dart package that helps to implement basic states for [Flutter](https://flutte
 | Package                                                                                    | Pub                                                                                                                  |
 | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
 | [value_state](https://github.com/devobs/value_state/tree/main/packages/value_state)          | [![pub package](https://img.shields.io/pub/v/value_state.svg)](https://pub.dev/packages/value_state)                               |
-| [value_cubit](https://github.com/devobs/value_state/tree/main/packages/value_cubit)          | [![pub package](https://img.shields.io/pub/v/value_cubit.svg)](https://pub.dev/packages/value_cubit)                               |
-| [flutter_value_state](https://github.com/devobs/value_state/tree/main/packages/flutter_value_state)          | [![pub package](https://img.shields.io/pub/v/flutter_value_state.svg)](https://pub.dev/packages/flutter_value_state)                               |
 
 
 

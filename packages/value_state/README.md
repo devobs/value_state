@@ -1,4 +1,4 @@
-A dart package that helps to implement basic states for [BLoC library](https://pub.dev/packages/bloc) to perform, load and fetch data.
+A dart package that helps to implement basic states initial, success and error.
 
 
 [![pub package](https://img.shields.io/pub/v/value_state.svg)](https://pub.dev/packages/value_state)
@@ -8,91 +8,115 @@ A dart package that helps to implement basic states for [BLoC library](https://p
 
 ## Features
 
-* Provides all necessary states for data : init, waiting, value/no value and error states,
-* Some helpers `performOnState` to emit intermediate states while an action is intended to update state : the same state is reemitted with attribute `refreshing` at `true`.
+This package helps you manage the different states your data can have in your app (like loading, success, or error). It makes your code cleaner and easier to understand, especially when dealing with things like network requests, storage loading or complex operations.
+
+It provides a way to represent a value that can be in one of three states:
+
+  * initial
+  * success
+  * failure
+
 
 ## Usage
 
+### Value
+
+Create a value:
+
 ```dart
-class CounterBehaviorSubject {
-  var _value = 0;
-  Future<int> _getCounterValueFromRepository() async => _value++;
+// The value is in the initial state.
+final valueInitial = Value<int>.initial();
 
-  Future<void> refresh() => performOnState<int, void>(
-      state: () => state,
-      emitter: _streamController.add,
-      action: (state, emitter) async {
-        final result = await _getCounterValueFromRepository();
+// The value is in the success state with data.
+final valueSuccess = Value.success(1);
 
-        if (result == 2) {
-          throw 'Error';
-        } else if (result > 4) {
-          emitter(const NoValueState());
-        } else {
-          emitter(ValueState(result));
-        }
-      });
+print('Data of value : ${valueSuccess.data}'); // Data of value : 1
 
-  final BaseState<int> _state = const InitState();
-  BaseState<int> get state => _state;
+// Map a Value to `failure` with actual data if any.
+// There is no `Value.failure` constructor to prevent developers from forgetting to retain the data from a previous state of the Value.
+final valueError = value1.toFailure(Exception('error'));
 
-  final _streamController = StreamController<BaseState<int>>();
-  late StreamSubscription<BaseState<int>> _streamSubscription;
+print('Data of value : ${valueError.data}'); // Data of value : null
+print('Error of value : "${valueError.error}"'); // Error of value : "Exception: error"
 
-  Stream<BaseState<int>> get stream =>
-      Stream.value(state).followedBy(_streamController.stream);
+// The new value from call `toFailure` on `valueSuccess` keep previous `data`. It provides a simple way to display both error and previous data (for example a refresh failure).
+final valueErrorWithPreviousData = valueSuccess.toFailure(Exception('error'));
 
-  Future<void> close() async {
-    await _streamSubscription.cancel();
-    await _streamController.close();
-  }
-}
+print('Data of value : ${valueErrorWithPreviousData.data}'); // Data of value : 1
+print('Error of value : "${valueErrorWithPreviousData.error}"'); // Error of value : "Exception: error"
 
-main() async {
-  final counterCubit = CounterBehaviorSubject();
-
-  final timer = Timer.periodic(const Duration(milliseconds: 500), (_) async {
-    try {
-      await counterCubit.refresh();
-    } catch (error) {
-      // Prevent stop execution for example
-    }
-  });
-
-  await for (final state in counterCubit.stream) {
-    if (state is ReadyState<int>) {
-      print('State is refreshing: ${state.refreshing}');
-
-      if (state.hasError) {
-        print('Error');
-      }
-
-      if (state is WithValueState<int>) {
-        print('Value : ${state.value}');
-      }
-
-      if (state is NoValueState<int>) {
-        timer.cancel();
-        print('No value');
-      }
-    } else {
-      print('Waiting for value - $state');
-    }
-  }
-}
 ```
 
-The whole code of this example is available in [example](example).
+Get the state of the value:
 
-## Models
+```dart
+// Get the state of the value.
+final state = valueInitial.state; // ValueState.initial
 
-### State diagram
+// Check if the value is in the initial state.
+final isInitial = valueInitial.isInitial; // true
 
-![State diagram](https://github.com/devobs/value_state/blob/main/packages/value_state/doc/state_diagram.png?raw=true)
+// Check if the value is in the success state.
+final isSuccess = valueSuccess.isSuccess; // false
 
-### Class diagram
+// Check if the value is in the failure state.
+final isFailure = valueError.isFailure; // false
+```
 
-![Class diagram](https://github.com/devobs/value_state/blob/main/packages/value_state/doc/class_diagram.png?raw=true)
+Map the value to a different type:
+
+```dart
+// Map the value to a different type.
+final map = valueInitial.map(
+  initial: () => 'initial',
+  success: (data) => 'success: $data',
+  failure: (error) => 'failure: $error',
+  orElse: () => 'orElse',
+);
+```
+
+When the value is in a specific state:
+
+```dart
+// When the value is in a specific state.
+final when = value.when(
+  initial: () => print('initial'),
+  success: (data) => print('success: $data'),
+  failure: (error) => print('failure: $error'),
+  orElse: () => print('orElse'),
+);
+```
+
+Merge two values with different types:
+
+```dart
+// Merge two values with different types.
+final mergedValue = value1.merge<int>(value2, mapData: (value) => value.length);
+```
+
+### Fetch
+
+Generate a stream of Value during a processing Future:
+
+```dart
+// Generate a stream of Value during a processing Future.
+final stream = Future.value(1).toValues();
+```
+
+Handle states (isFetching, success, error...) while an action is processed:
+
+```dart
+// Handle states (isFetching, success, error...) while an action is processed.
+final fetch = value.fetch(
+  () async => 1,
+);
+```
+
+## License
+
+MIT License
+
+See the [LICENSE](https://www.google.com/url?sa=E&source=gmail&q=https://www.google.com/url?sa=E%26source=gmail%26q=LICENSE) file for details.
 
 ## Feedback
 
