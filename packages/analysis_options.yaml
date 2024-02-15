@@ -1,7 +1,0 @@
-include: package:lints/recommended.yaml
-
-linter:
-  rules:
-    - prefer_const_constructors
-    - prefer_const_declarations
-    - prefer_single_quotes

@@ -1,76 +1,61 @@
-import 'perform.dart';
-import 'states.dart';
+import 'value.dart';
 
-extension ObjectWithValueExtensions<T> on BaseState<T> {
-  /// Shortcut on [BaseState] to easily handle [WithValueState] state. It can be used in different case :
-  /// * To return a value
-  /// ```dart
-  /// print('Phone number : ${personState.withValue((person) => person.phone) ?? 'unknown'}');
-  /// ```
-  /// * To perform some action
-  /// ```dart
-  /// personState.withValue((person) => print('Phone number : ${person.phone}'));
-  /// ```
+extension ValueExtensions<T extends Object> on Value<T> {
+  /// Provides a concise way to map a value depending on the [Value.state] of
+  /// this value.
+  /// * [initial] is called if this value is [Value.isInitial],
+  /// * [success] is called if this value is [Value.isSuccess], [Value.data] is
+  ///   then available,
+  /// * [data] is called if this value has [Value.data] available (can occur
+  ///   in both [ValueState.success] and [ValueState.failure] states),
+  /// * [failure] is called if this value is [Value.isFailure], and
+  ///   [Value.error] is then available as parameter,
+  /// * [orElse] is called if none of the above match or not specified. This
+  ///   parameter is required.
+  R map<R>({
+    R Function()? initial,
+    R Function(T data)? success,
+    R Function(T data)? data,
+    R Function(Object error)? failure,
+    required R Function() orElse,
+  }) {
+    final dataAvailable = data; // to make code more readable.
+
+    return switch (this) {
+      Value<T>(isInitial: true) when initial != null => initial(),
+      Value<T>(:final dataOnSuccess?) when success != null =>
+        success(dataOnSuccess),
+      Value<T>(:final data?) when dataAvailable != null => dataAvailable(data),
+      Value<T>(:final error?) when failure != null => failure(error),
+      _ => orElse(),
+    };
+  }
+
+  /// Provides a concise way to execute an action or map a value depending on
+  /// the [Value.state] of this value.
+  /// * [initial] is called if this value is [Value.isInitial],
+  /// * [success] is called if this value is [Value.isSuccess], [Value.data] is
+  ///   then available as parameter,
+  /// * [data] is called if this value has [Value.data] available (can occur
+  ///   in both [ValueState.success] and [ValueState.failure] states),
+  /// * [failure] is called if this value is [Value.isFailure], and
+  ///   [Value.error] is then available as parameter,
+  /// * [orElse] is called if none of the above match or not specified.
   ///
-  /// If [onlyValueState] is true, then [withValue] is trigerred only on [ValueState] state.
-  R? withValue<R>(R Function(T value) onValue, {bool onlyValueState = false}) {
-    final state = this;
-
-    if (state is WithValueState<T>) {
-      if (!onlyValueState || !state.hasError) {
-        return onValue(state.value);
-      }
-    }
-
-    return null;
-  }
-
-  /// Shorcut to [withValue] with its parameter `onlyValueState` set to `true`. It is equivalent to handle only
-  /// [ValueState] state.
-  R? whenValue<R>(R Function(T value) onValue) =>
-      withValue<R>(onValue, onlyValueState: true);
-
-  /// Shorcut to [withValue] which return the value if avaible. [onlyValueState] is the same as [withValue].
-  T? toValue({bool onlyValueState = false}) =>
-      withValue((value) => value, onlyValueState: onlyValueState);
-}
-
-extension OrExtensions<R> on R? {
-  /// Helpers to execute/return non null result on a null object.
-  ///
-  /// Example :
-  /// ```dart
-  /// personState.whenValue((person) {
-  ///   print('Phone number : ${person.phone}');
-  /// }).orElse(() {
-  ///   print('Phone number unknown');
-  /// });
-  /// ```
-  R orElse(R Function() elseAction) => this ?? elseAction();
-}
-
-extension ToReadyStateExtensions<T extends Object> on T? {
-  /// Shorcut to transform to a [ReadyState] with following rules :
-  /// * if `this`is non null, it returns a [ValueState]
-  /// * else it returns a [NoValueState]
-  ReadyState<T> toState({bool refreshing = false}) {
-    final state = this;
-    return state == null
-        ? NoValueState<T>(refreshing: refreshing)
-        : ValueState<T>(state, refreshing: refreshing);
-  }
-}
-
-extension FutureValueStateExtension<T> on Future<T?> {
-  /// Map a [Future] to [ReadyState] : [NoValueState] or [ValueState].
-  Future<ReadyState<T>> toFutureState({bool refreshing = false}) async {
-    final result = await this;
-
-    if (result == null) return NoValueState(refreshing: refreshing);
-    return ValueState(result, refreshing: refreshing);
-  }
-
-  /// Generate a stream of [BaseState] during a processing [Future].
-  Stream<BaseState<T>> toStates() =>
-      InitState<T>().perform((_) => toFutureState());
+  /// If none of those parameters are specified or does not match, then this
+  /// method returns `null`.
+  R? when<R>({
+    R Function()? initial,
+    R Function(T data)? success,
+    R Function(T data)? data,
+    R Function(Object error)? failure,
+    R Function()? orElse,
+  }) =>
+      map<R?>(
+        initial: initial,
+        success: success,
+        data: data,
+        failure: failure,
+        orElse: orElse ?? () => null,
+      );
 }
