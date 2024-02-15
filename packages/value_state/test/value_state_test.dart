@@ -1,223 +1,394 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:test/test.dart';
 import 'package:value_state/value_state.dart';
 
-import 'stream.dart';
-
 void main() {
-  group('test with stream', () {
-    late CounterStream counterStream;
+  const value = 0;
+  final valueStr = value.toString();
+  const error = 'Error';
+  final stackTrace = StackTrace.fromString('My StackTrace');
 
-    setUp(() {
-      counterStream = CounterStream();
+  group('test getters', () {
+    test('initial state', () {
+      final state = Value<int>.initial();
+
+      expect(state.isInitial, isTrue);
+      expect(state.isFetching, isFalse);
+      expect(state.isRefetching, isFalse);
+      expect(state.isSuccess, isFalse);
+      expect(state.isFailure, isFalse);
+      expect(state.dataOnSuccess, isNull);
+      expect(state.previousDataOnFailure, isNull);
+      expect(state.hasData, isFalse);
+      expect(state.hasError, isFalse);
+      expect(state.hasStackTrace, isFalse);
+      expect(state.data, isNull);
+      expect(state.error, isNull);
+      expect(state.stackTrace, isNull);
     });
 
-    tearDown(() async {
-      await counterStream.close();
+    test('initial state fetching', () {
+      final state = Value<int>.initial(isFetching: true);
+
+      expect(state.isInitial, isTrue);
+      expect(state.isFetching, isTrue);
+      expect(state.isRefetching, isFalse);
+      expect(state.isSuccess, isFalse);
+      expect(state.isFailure, isFalse);
+      expect(state.dataOnSuccess, isNull);
+      expect(state.previousDataOnFailure, isNull);
+      expect(state.hasData, isFalse);
+      expect(state.hasError, isFalse);
+      expect(state.hasStackTrace, isFalse);
+      expect(state.data, isNull);
+      expect(state.error, isNull);
+      expect(state.stackTrace, isNull);
     });
 
-    test('with values incremented', () {
+    test('success state', () {
+      final state = Value.success(value);
+
+      expect(state.isInitial, isFalse);
+      expect(state.isFetching, isFalse);
+      expect(state.isRefetching, isFalse);
+      expect(state.isSuccess, isTrue);
+      expect(state.isFailure, isFalse);
+      expect(state.hasData, isTrue);
+      expect(state.hasError, isFalse);
+      expect(state.hasStackTrace, isFalse);
+      expect(state.data, value);
+      expect(state.error, isNull);
+      expect(state.stackTrace, isNull);
+    });
+
+    test('success state', () {
+      final state = Value.success(value);
+
+      expect(state.isInitial, isFalse);
+      expect(state.isFetching, isFalse);
+      expect(state.isRefetching, isFalse);
+      expect(state.isSuccess, isTrue);
+      expect(state.isFailure, isFalse);
+      expect(state.dataOnSuccess, value);
+      expect(state.previousDataOnFailure, isNull);
+      expect(state.hasData, isTrue);
+      expect(state.hasError, isFalse);
+      expect(state.hasStackTrace, isFalse);
+      expect(state.data, value);
+      expect(state.error, null);
+      expect(state.stackTrace, null);
+    });
+
+    test('success state fetching', () {
+      final state = Value.success(value, isFetching: true);
+
+      expect(state.isInitial, isFalse);
+      expect(state.isFetching, isTrue);
+      expect(state.isRefetching, isTrue);
+      expect(state.isFetching, isTrue);
+      expect(state.isFailure, isFalse);
+      expect(state.dataOnSuccess, value);
+      expect(state.previousDataOnFailure, isNull);
+      expect(state.hasData, isTrue);
+      expect(state.hasError, isFalse);
+      expect(state.hasStackTrace, isFalse);
+      expect(state.data, value);
+      expect(state.error, isNull);
+      expect(state.stackTrace, isNull);
+    });
+
+    test('failure state', () {
+      final state = Value<int>.failure(error, stackTrace: stackTrace);
+
+      expect(state.isInitial, isFalse);
+      expect(state.isFetching, isFalse);
+      expect(state.isRefetching, isFalse);
+      expect(state.isSuccess, isFalse);
+      expect(state.isFailure, isTrue);
+      expect(state.hasData, isFalse);
+      expect(state.hasError, isTrue);
+      expect(state.hasStackTrace, isTrue);
+      expect(state.data, isNull);
+      expect(state.error, error);
+      expect(state.stackTrace, stackTrace);
+    });
+
+    test('failure state fetching', () {
+      final state = Value<int>.failure(
+        error,
+        stackTrace: stackTrace,
+        isFetching: true,
+      );
+
+      expect(state.isInitial, isFalse);
+      expect(state.isFetching, isTrue);
+      expect(state.isRefetching, isTrue);
+      expect(state.isSuccess, isFalse);
+      expect(state.isFailure, isTrue);
+      expect(state.dataOnSuccess, isNull);
+      expect(state.previousDataOnFailure, isNull);
+      expect(state.hasData, isFalse);
+      expect(state.hasError, isTrue);
+      expect(state.hasStackTrace, isTrue);
+      expect(state.data, isNull);
+      expect(state.error, error);
+      expect(state.stackTrace, stackTrace);
+    });
+
+    test('success to failure state', () {
+      final state = Value.success(value).toFailure(error);
+
+      expect(state.isInitial, isFalse);
+      expect(state.isFetching, isFalse);
+      expect(state.isRefetching, isFalse);
+      expect(state.isSuccess, isFalse);
+      expect(state.isFailure, isTrue);
+      expect(state.dataOnSuccess, isNull);
+      expect(state.previousDataOnFailure, value);
+      expect(state.hasData, isTrue);
+      expect(state.hasError, isTrue);
+      expect(state.hasStackTrace, isFalse);
+      expect(state.data, value);
+      expect(state.error, error);
+      expect(state.stackTrace, isNull);
+    });
+  });
+
+  group('merge', () {
+    test('merge success in initial', () {
+      final state = Value<int>.initial().merge(
+        Value.success(valueStr),
+        mapData: (from) => Value.success(int.parse(from)),
+      );
+
+      expect(state.isInitial, isFalse);
+      expect(state.isFetching, isFalse);
+      expect(state.isRefetching, isFalse);
+      expect(state.isSuccess, isTrue);
+      expect(state.isFailure, isFalse);
+      expect(state.hasData, isTrue);
+      expect(state.hasError, isFalse);
+      expect(state.hasStackTrace, isFalse);
+      expect(state.data, value);
+      expect(state.error, isNull);
+      expect(state.stackTrace, isNull);
+    });
+
+    test('merge success in success', () {
+      final state = Value.success(value).merge(
+        Value.success(valueStr),
+        mapData: (from) => Value.success(int.parse(from)),
+      );
+
+      expect(state.isInitial, isFalse);
+      expect(state.isFetching, isFalse);
+      expect(state.isRefetching, isFalse);
+      expect(state.isSuccess, isTrue);
+      expect(state.isFailure, isFalse);
+      expect(state.hasData, isTrue);
+      expect(state.hasError, isFalse);
+      expect(state.hasStackTrace, isFalse);
+      expect(state.data, value);
+      expect(state.error, isNull);
+      expect(state.stackTrace, isNull);
+    });
+
+    test('merge success in failure', () {
+      final state = Value<int>.failure(error).merge(
+        Value.success(valueStr, isFetching: true),
+        mapData: (from) => Value.success(int.parse(from)),
+      );
+
+      expect(state.isInitial, isFalse);
+      expect(state.isFetching, isTrue);
+      expect(state.isRefetching, isTrue);
+      expect(state.isSuccess, isTrue);
+      expect(state.isFailure, isFalse);
+      expect(state.hasData, isTrue);
+      expect(state.hasError, isFalse);
+      expect(state.hasStackTrace, isFalse);
+      expect(state.data, value);
+      expect(state.error, isNull);
+      expect(state.stackTrace, isNull);
+    });
+
+    test('merge failure in initial', () {
+      final state = Value<int>.initial().merge(
+        Value<String>.failure(error),
+        mapData: (from) => Value.success(int.parse(from)),
+      );
+
+      expect(state.isInitial, isFalse);
+      expect(state.isFetching, isFalse);
+      expect(state.isRefetching, isFalse);
+      expect(state.isSuccess, isFalse);
+      expect(state.isFailure, isTrue);
+      expect(state.hasData, isFalse);
+      expect(state.hasError, isTrue);
+      expect(state.hasStackTrace, isFalse);
+      expect(state.data, isNull);
+      expect(state.error, error);
+      expect(state.stackTrace, isNull);
+    });
+
+    test('merge failure in success', () {
+      final state = Value.success(value).merge(
+        Value<String>.failure(error),
+        mapData: (from) => Value.success(int.parse(from)),
+      );
+
+      expect(state.isInitial, isFalse);
+      expect(state.isFetching, isFalse);
+      expect(state.isRefetching, isFalse);
+      expect(state.isSuccess, isFalse);
+      expect(state.isFailure, isTrue);
+      expect(state.hasData, isTrue);
+      expect(state.hasError, isTrue);
+      expect(state.hasStackTrace, isFalse);
+      expect(state.data, value);
+      expect(state.error, error);
+      expect(state.stackTrace, isNull);
+    });
+
+    test('merge initial in failure', () {
+      final state = Value<int>.failure(error).merge(
+        Value<String>.initial(),
+        mapData: (from) => Value.success(int.parse(from)),
+      );
+
+      expect(state.isInitial, isTrue);
+      expect(state.isFetching, isFalse);
+      expect(state.isRefetching, isFalse);
+      expect(state.isSuccess, isFalse);
+      expect(state.isFailure, isFalse);
+      expect(state.hasData, isFalse);
+      expect(state.hasError, isFalse);
+      expect(state.hasStackTrace, isFalse);
+      expect(state.data, isNull);
+      expect(state.error, isNull);
+      expect(state.stackTrace, isNull);
+    });
+  });
+
+  group('Value mappers', () {
+    const myStr = 'My String';
+    const myError = 'Test Error';
+    const initial = Value<String>.initial();
+    final success = Value<String>.success(myStr);
+
+    final failure = Value<String>.failure(myError, stackTrace: stackTrace);
+    final failureWithData = success.toFailure(myError, stackTrace: stackTrace);
+
+    test('toFailure', () {
       expect(
-          counterStream.stream,
-          emitsInOrder([
-            isA<InitState<int>>()
-                .having((state) => state.fetching, 'init fetching', true),
-            isA<PendingState<int>>()
-                .having((state) => state.fetching, 'init fetching', true),
-            isA<ValueState<int>>()
-                .having((state) => state.refreshing,
-                    'first value not refreshing', false)
-                .having((state) => state.fetching, 'first value not fetching',
-                    false)
-                .having((state) => state.value, 'first value', 0),
-            isA<ValueState<int>>()
-                .having((state) => state.refreshing,
-                    'second value not refreshing', true)
-                .having(
-                    (state) => state.fetching, 'second value fetching', true)
-                .having((state) => state.value, 'second value', 0),
-            isA<ValueState<int>>()
-                .having((state) => state.refreshing,
-                    'second value not refreshing', false)
-                .having((state) => state.value, 'second value', 1),
-            // refresh with no value after value
-            isA<ValueState<int>>()
-                .having((state) => state.refreshing, 'second value  refreshing',
-                    true)
-                .having((state) => state.value, 'second value', 1),
-            isA<NoValueState<int>>()
-                .having((state) => state.refreshing, 'no value', false),
-            isA<NoValueState<int>>().having(
-                (state) => state.refreshing, 'no value refreshing', true),
-            isA<ErrorWithoutPreviousValue<int>>()
-                .having((state) => state.refreshing,
-                    'error for third value not refreshing', false)
-                .having(
-                  (state) => state.stateBeforeError,
-                  'no value before erreur',
-                  isA<NoValueState<int>>()
-                      .having((state) => state.refreshing, 'no value', false),
-                )
-                .having((state) => state.hasValue, 'second value before erreur',
-                    false),
-            // refresh with error after error
-            isA<ErrorWithoutPreviousValue<int>>().having(
-                (state) => state.refreshing,
-                'error for third value refreshing',
-                true),
-            isA<ErrorWithoutPreviousValue<int>>()
-                .having((state) => state.refreshing,
-                    'error for fourth value not refreshing', false)
-                .having(
-                  (state) => state.stateBeforeError,
-                  'no value before erreur',
-                  isA<NoValueState<int>>()
-                      .having((state) => state.refreshing, 'no value', false),
-                )
-                .having((state) => state.hasValue, 'second value before erreur',
-                    false),
-            // refresh after arror
-            isA<ErrorWithoutPreviousValue<int>>().having(
-                (state) => state.refreshing,
-                'error for fourth value refreshing',
-                true),
-            isA<ValueState<int>>()
-                .having((state) => state.refreshing,
-                    'fifth value not refreshing', false)
-                .having((state) => state.value, 'fifth value ', 5),
-            isA<ValueState<int>>()
-                .having(
-                    (state) => state.refreshing, 'fifth value refreshing', true)
-                .having((state) => state.value, 'fifth value', 5),
-            isA<ErrorWithPreviousValue<int>>()
-                .having((state) => state.refreshing,
-                    'error for sixth value refreshing', false)
-                .having((state) => state.hasValue, 'error for sixth has value',
-                    true)
-                .having((state) => state.value,
-                    'error for sixth value refreshing', 5),
-            isA<ErrorWithPreviousValue<int>>().having(
-                (state) => state.refreshing,
-                'error for sixth value refreshing',
-                true),
-            isA<ValueState<int>>()
-                .having((state) => state.refreshing,
-                    'seventh value not refreshing', false)
-                .having((state) => state.value, 'seventh value', 7),
-            isA<ValueState<int>>()
-                .having((state) => state.refreshing, 'seventh value refreshing',
-                    true)
-                .having((state) => state.value, 'seventh value', 7),
-            isA<ValueState<int>>()
-                .having((state) => state.refreshing,
-                    'eighth value not refreshing', false)
-                .having((state) => state.value, 'eighth value', 8),
-            // after _myRefresh.clear() triggered
-            isA<PendingState<int>>(),
-          ]));
+        initial.toFailure(
+          myError,
+          stackTrace: stackTrace,
+        ),
+        Value<String>.failure(myError, stackTrace: stackTrace),
+      );
+      expect(
+        initial.toFailure(
+          myError,
+          stackTrace: stackTrace,
+          isFetching: true,
+        ),
+        Value<String>.failure(
+          myError,
+          stackTrace: stackTrace,
+          isFetching: true,
+        ),
+      );
 
-      streamStandardActions(counterStream);
+      expect(
+        failure.toFailure(myError, stackTrace: stackTrace),
+        Value<String>.failure(myError, stackTrace: stackTrace),
+      );
+      expect(
+        failure.toFailure(myError, stackTrace: stackTrace, isFetching: true),
+        Value<String>.failure(
+          myError,
+          stackTrace: stackTrace,
+          isFetching: true,
+        ),
+      );
+
+      expect(
+        failureWithData,
+        isA<Value<String>>()
+            .having((value) => value.data, 'has data', failureWithData.data!)
+            .having((value) => value.isFetching, 'is not fetching', false)
+            .having((value) => value.isFailure, 'is failure', true)
+            .having(
+              (value) => value.error,
+              'failure content',
+              myError,
+            ),
+      );
+      expect(
+        success.toFailure(myError, isFetching: true),
+        isA<Value<String>>()
+            .having((value) => value.isFetching, 'is fetching', true)
+            .having((value) => value.isFailure, 'is failure', true)
+            .having(
+              (value) => value.error,
+              'failure content',
+              myError,
+            ),
+      );
     });
   });
 
-  test('equalities and hash', () {
+  test('test equalities and hash', () {
     // Dont create object with [const] to avoid [identical] return true
-    const initState1 = InitState<int>(), initState2 = InitState<int>();
+    final init1 = Value<int>.initial(), init2 = Value<int>.initial();
 
-    expect(initState1, initState2);
-    expect(initState1.hashCode, initState2.hashCode);
+    expect(init1, init2);
+    expect(init1.hashCode, init2.hashCode);
 
-    const waitingState1 = PendingState<int>(),
-        waitingState2 = PendingState<int>();
+    final fetching1 = Value<int>.initial(isFetching: true),
+        fetching2 = Value<int>.initial(isFetching: true);
 
-    expect(waitingState1, waitingState2);
-    expect(waitingState1.hashCode, waitingState2.hashCode);
+    expect(fetching1, fetching2);
+    expect(fetching1.hashCode, fetching2.hashCode);
 
-    expect(waitingState1.mayRefreshing(), waitingState1);
-    expect(waitingState1.mayNotRefreshing(), waitingState2);
+    final success1 = Value.success(value), success2 = Value.success(value);
 
-    const noValueState1 = NoValueState<int>(),
-        noValueState2 = NoValueState<int>();
+    expect(success1, success2);
+    expect(success1.hashCode, success2.hashCode);
 
-    expect(noValueState1, noValueState2);
-    expect(noValueState1.hashCode, noValueState2.hashCode);
+    final failure1 = Value<int>.failure(error),
+        failure2 = Value<int>.failure(error);
 
-    const valueState1 = ValueState<int>(0), valueState2 = ValueState<int>(0);
+    expect(failure1, failure2);
+    expect(failure1.hashCode, failure2.hashCode);
 
-    expect(valueState1, valueState2);
-    expect(valueState1.hashCode, valueState2.hashCode);
+    final failureWithData1 = success1.toFailure(error),
+        failureWithData2 = success2.toFailure(error);
 
-    final errorState1 =
-            ErrorState<int>(previousState: const InitState(), error: 'Error'),
-        errorState2 =
-            ErrorState<int>(previousState: const InitState(), error: 'Error');
-
-    expect(errorState1, errorState2);
-    expect(errorState1.hashCode, errorState2.hashCode);
-
-    final errorStateWithValue1 =
-            ErrorState<int>(previousState: const ValueState(1), error: 'Error'),
-        errorStateWithValue2 =
-            ErrorState<int>(previousState: const ValueState(1), error: 'Error');
-
-    expect(errorStateWithValue1, errorStateWithValue2);
-    expect(errorStateWithValue1.hashCode, errorStateWithValue2.hashCode);
+    expect(failureWithData1, failureWithData2);
+    expect(failureWithData1.hashCode, failureWithData2.hashCode);
   });
 
-  test('visitor', () {
-    const visitor = _TestStateVisitor();
+  test('test toString', () {
+    expect(const Value<String>.initial().toString(),
+        'Value<String>(state: ValueState.initial, isFetching: false)');
 
-    expect(const InitState().accept(visitor), 1);
-    expect(const PendingState().accept(visitor), 4);
-    expect(const NoValueState().accept(visitor), 2);
-    expect(const ValueState(0).accept(visitor), 3);
+    final value = Value.success('My value');
+
     expect(
-        ErrorState(previousState: const InitState(), error: 'Error')
-            .accept(visitor),
-        0);
+        value.toString(),
+        'Value<String>(state: ValueState.success, isFetching: false, '
+        'data: My value)');
+    expect(
+        value.toFailure(ArgumentError()).toString(),
+        'Value<String>(state: ValueState.failure, isFetching: false, '
+        'data: My value, error: Invalid argument(s))');
+
+    expect(
+        Value<String>.failure(ArgumentError()).toString(),
+        'Value<String>(state: ValueState.failure, isFetching: false, '
+        'error: Invalid argument(s))');
   });
-
-  test('toString', () {
-    expect(const InitState<String>().toString(),
-        'InitState<String>(fetching: true)');
-
-    const pendingState = PendingState<String>();
-    expect(pendingState.toString(), 'PendingState<String>(fetching: true)');
-
-    expect(const NoValueState<String>().toString(),
-        'NoValueState<String>(fetching: false)');
-
-    const valueState = ValueState<String>('My value');
-
-    expect(valueState.toString(),
-        'ValueState<String>(fetching: false, value: ${valueState.value})');
-    expect(
-        ErrorState<String>(previousState: valueState, error: ArgumentError())
-            .toString(),
-        'ErrorWithPreviousValue<String>(fetching: false, error: Invalid argument(s), stateBeforeError: $valueState)');
-    expect(
-        ErrorState<String>(
-                previousState: pendingState,
-                error: ArgumentError(),
-                stackTrace: StackTrace.fromString('My StackTrace'))
-            .toString(),
-        'ErrorWithoutPreviousValue<String>(fetching: false, error: Invalid argument(s), stackTrace: My StackTrace, '
-        'stateBeforeError: $pendingState)');
-  });
-}
-
-class _TestStateVisitor extends StateVisitor<int, int> {
-  const _TestStateVisitor();
-
-  @override
-  visitInitState(InitState state) => 1;
-  @override
-  visitPendingState(PendingState state) => 4;
-
-  @override
-  visitValueState(ValueState state) => 3;
-  @override
-  visitNoValueState(NoValueState state) => 2;
-
-  @override
-  visitErrorState(ErrorState state) => 0;
 }
