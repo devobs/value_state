@@ -2,6 +2,39 @@ import 'perform.dart';
 import 'states.dart';
 
 extension ObjectWithValueExtensions<T> on BaseState<T> {
+  /// Destructuring pattern-matching
+  ///
+  /// Example :
+  /// ```dart
+  ///    const String? nullStr = null;
+  ///    final result = nullStr.toState().when(
+  ///       onValue: (state) => 'Value',
+  ///       onError: (error) => 'Error',
+  ///       orElse: () => 'Null value',
+  ///    );
+  /// ```
+  R when<R>({
+    R Function()? onWaiting,
+    R Function()? onNoValue,
+    R Function(T value)? onValue,
+    R Function(Object error)? onError,
+    required R Function() orElse,
+  }) {
+    final state = this;
+
+    if (state is WaitingState<T>) {
+      return onWaiting?.call() ?? orElse();
+    } else if (state is NoValueState<T>) {
+      return onNoValue?.call() ?? orElse();
+    } else if (state is ValueState<T>) {
+      return onValue?.call(state.value) ?? orElse();
+    } else if (state is ErrorState<T>) {
+      return onError?.call(state.error) ?? orElse();
+    }
+
+    return orElse();
+  }
+
   /// Shortcut on [BaseState] to easily handle [WithValueState] state. It can be used in different case :
   /// * To return a value
   /// ```dart
@@ -27,12 +60,10 @@ extension ObjectWithValueExtensions<T> on BaseState<T> {
 
   /// Shorcut to [withValue] with its parameter `onlyValueState` set to `true`. It is equivalent to handle only
   /// [ValueState] state.
-  R? whenValue<R>(R Function(T value) onValue) =>
-      withValue<R>(onValue, onlyValueState: true);
+  R? whenValue<R>(R Function(T value) onValue) => withValue<R>(onValue, onlyValueState: true);
 
   /// Shorcut to [withValue] which return the value if avaible. [onlyValueState] is the same as [withValue].
-  T? toValue({bool onlyValueState = false}) =>
-      withValue((value) => value, onlyValueState: onlyValueState);
+  T? toValue({bool onlyValueState = false}) => withValue((value) => value, onlyValueState: onlyValueState);
 }
 
 extension OrExtensions<R> on R? {
@@ -55,9 +86,7 @@ extension ToReadyStateExtensions<T extends Object> on T? {
   /// * else it returns a [NoValueState]
   ReadyState<T> toState({bool refreshing = false}) {
     final state = this;
-    return state == null
-        ? NoValueState<T>(refreshing: refreshing)
-        : ValueState<T>(state, refreshing: refreshing);
+    return state == null ? NoValueState<T>(refreshing: refreshing) : ValueState<T>(state, refreshing: refreshing);
   }
 }
 
@@ -71,6 +100,5 @@ extension FutureValueStateExtension<T> on Future<T?> {
   }
 
   /// Generate a stream of [BaseState] during a processing [Future].
-  Stream<BaseState<T>> toStates() =>
-      InitState<T>().perform((_) => toFutureState());
+  Stream<BaseState<T>> toStates() => InitState<T>().perform((_) => toFutureState());
 }
