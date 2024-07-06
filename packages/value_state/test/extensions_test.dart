@@ -5,18 +5,57 @@ void main() {
   const myStr = 'My String';
   const myStrOrElse = 'My String orElse';
 
+  group('when()', () {
+    test('on a non null String', () {
+      final result = myStr.toState().when(
+            onWaiting: () => 'Waiting',
+            onNoValue: () => 'No Value',
+            onValue: (value) => value,
+            onError: (error) => 'Error',
+            orElse: () => 'Else',
+          );
+
+      expect(result, 'My String');
+    });
+
+    test('on null', () {
+      const String? nullStr = null;
+
+      final result = nullStr.toState().when(
+            onWaiting: () => 'Waiting',
+            onNoValue: () => 'No Value',
+            onValue: (state) => 'Value',
+            onError: (error) => 'Error',
+            orElse: () => 'Else',
+          );
+
+      expect(result, 'No Value');
+    });
+
+    test('orElse', () {
+      const String? nullStr = null;
+
+      final result = nullStr.toState().when(
+            onValue: (state) => 'Value',
+            onError: (error) => 'Error',
+            orElse: () => 'Else',
+          );
+
+      expect(result, 'Else');
+    });
+  });
+
   group('toState()', () {
     test('on a non null String', () {
       expect(myStr.toState(), const ValueState(myStr));
-      expect(myStr.toState(refreshing: true),
-          const ValueState(myStr, refreshing: true));
+      expect(myStr.toState(refreshing: true), const ValueState(myStr, refreshing: true));
     });
+
     test('on null', () {
       const String? nullStr = null;
 
       expect(nullStr.toState(), const NoValueState<String>());
-      expect(nullStr.toState(refreshing: true),
-          const NoValueState<String>(refreshing: true));
+      expect(nullStr.toState(refreshing: true), const NoValueState<String>(refreshing: true));
     });
   });
 
@@ -42,39 +81,32 @@ void main() {
     });
 
     test('on a $InitState with onlyValueState to true', () {
-      final result =
-          const InitState<String>().withValue(modifier, onlyValueState: true);
+      final result = const InitState<String>().withValue(modifier, onlyValueState: true);
 
       expect(result, isNull);
     });
 
     test('on a $ErrorState', () {
-      final result =
-          ErrorState<String>(error: 'Error', previousState: myStr.toState())
-              .withValue(modifier);
+      final result = ErrorState<String>(error: 'Error', previousState: myStr.toState()).withValue(modifier);
 
       expect(result, modifier(myStr));
     });
 
     test('on a $ErrorState with onlyValueState to true', () {
       final result =
-          ErrorState<String>(error: 'Error', previousState: myStr.toState())
-              .withValue(modifier, onlyValueState: true);
+          ErrorState<String>(error: 'Error', previousState: myStr.toState()).withValue(modifier, onlyValueState: true);
 
       expect(result, isNull);
     });
 
     test('orElse on a $ValueState', () {
-      final result =
-          myStr.toState().withValue(modifier).orElse(() => myStrOrElse);
+      final result = myStr.toState().withValue(modifier).orElse(() => myStrOrElse);
 
       expect(result, modifier(myStr));
     });
 
     test('orElse on a $InitState', () {
-      final result = const InitState<String>()
-          .withValue(modifier)
-          .orElse(() => myStrOrElse);
+      final result = const InitState<String>().withValue(modifier).orElse(() => myStrOrElse);
 
       expect(result, myStrOrElse);
     });
@@ -97,9 +129,7 @@ void main() {
     });
 
     test('on a $ErrorState', () {
-      final result =
-          ErrorState<String>(error: 'Error', previousState: myStr.toState())
-              .whenValue(modifier);
+      final result = ErrorState<String>(error: 'Error', previousState: myStr.toState()).whenValue(modifier);
 
       expect(result, isNull);
     });
@@ -131,17 +161,13 @@ void main() {
     });
 
     test('on a $ErrorState', () {
-      final result =
-          ErrorState<String>(error: 'Error', previousState: myStr.toState())
-              .toValue();
+      final result = ErrorState<String>(error: 'Error', previousState: myStr.toState()).toValue();
 
       expect(result, myStr);
     });
 
     test('on a $ErrorState with onlyValueState to true', () {
-      final result =
-          ErrorState<String>(error: 'Error', previousState: myStr.toState())
-              .toValue(onlyValueState: true);
+      final result = ErrorState<String>(error: 'Error', previousState: myStr.toState()).toValue(onlyValueState: true);
 
       expect(result, isNull);
     });
@@ -151,8 +177,7 @@ void main() {
     const value = 'Result';
 
     expect(Future.value(value).toFutureState(), completion(value.toState()));
-    expect(Future<String?>.value(null).toFutureState(),
-        completion(const NoValueState<String>()));
+    expect(Future<String?>.value(null).toFutureState(), completion(const NoValueState<String>()));
   });
 
   test('toStates', () {
