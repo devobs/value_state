@@ -1,3 +1,9 @@
+## 2.0.0-beta.0
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **REFACTOR**: class ValueState is replaced by Value.
+
 ## 1.5.1
 
  - **FIX**: close stream in perform.
