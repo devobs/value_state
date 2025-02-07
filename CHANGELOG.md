@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2025-02-07
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - [`value_state` - `v2.0.0-beta.0`](#value_state---v200-beta0)
+
+Packages with other changes:
+
+ - There are no other changes in this release.
+
+---
+
+#### `value_state` - `v2.0.0-beta.0`
+
+ - **BREAKING** **REFACTOR**: class ValueState is replaced by Value.
+
+
 ## 2023-06-01
 
 ### Changes
