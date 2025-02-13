@@ -1,3 +1,9 @@
+## 2.0.0-beta.1
+
+> Note: This release has breaking changes.
+
+ - **DOCS**: simplify README.md.
+
 ## 2.0.0-beta.0
 
 > Note: This release has breaking changes.
