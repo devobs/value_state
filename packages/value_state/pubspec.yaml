@@ -2,7 +2,7 @@ name: value_state
 description: A dart package that helps implements basic states for BLoC library
 repository: https://github.com/devobs/value_state
 homepage: https://github.com/devobs
-version: 2.0.0-beta.0
+version: 2.0.0-beta.1
 
 environment:
   sdk: ^3.4.0
