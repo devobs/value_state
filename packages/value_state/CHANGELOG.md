@@ -1,3 +1,11 @@
+## 2.0.0-beta.1
+
+> Note: This release has breaking changes.
+
+ - **DOCS**: simplify README.md.
+ - **BREAKING** **REFACTOR**: class ValueState is replaced by Value.
+ - **BREAKING** **REFACTOR**: class ValueState is replaced by Value.
+
 ## 2.0.0-beta.0
 
 > Note: This release has breaking changes.
