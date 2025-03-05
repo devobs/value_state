@@ -17,7 +17,7 @@ dependencies:
   flutter_riverpod: ^2.6.1
   riverpod_annotation: ^2.6.1
 
-  value_state: ^2.0.0
+  value_state: ^2.0.1
     
 dev_dependencies:
   flutter_test:

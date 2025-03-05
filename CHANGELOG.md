@@ -11,6 +11,27 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 Packages with breaking changes:
 
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`value_state` - `v2.0.1`](#value_state---v201)
+
+---
+
+#### `value_state` - `v2.0.1`
+
+ - **DOCS**: added pattern matching and migration.
+
+
+## 2025-03-05
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
  - [`value_state` - `v2.0.0`](#value_state---v200)
 
 Packages with other changes:

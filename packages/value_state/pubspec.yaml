@@ -1,6 +1,6 @@
 name: value_state
 description: This Dart package simplifies the implementation of common data-fetching states (loading, success, error).
-version: 2.0.0
+version: 2.0.1
 repository: https://github.com/devobs/value_state
 homepage: https://github.com/devobs
 topics: [error, fetch, init, state, success]
