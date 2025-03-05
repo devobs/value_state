@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2025-03-05
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - [`value_state` - `v2.0.0`](#value_state---v200)
+
+Packages with other changes:
+
+ - There are no other changes in this release.
+
+Packages graduated to a stable release (see pre-releases prior to the stable version for changelog entries):
+
+ - `value_state` - `v2.0.0`
+
+---
+
+#### `value_state` - `v2.0.0`
+
+
 ## 2025-02-13
 
 ### Changes
