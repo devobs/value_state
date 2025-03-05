@@ -24,7 +24,7 @@ final state = valueInitial.state; // ValueState.initial
 final isInitial = valueInitial.isInitial; // true
 
 final valueSuccess = Value.success(1);
-final isSuccess = valueSuccess.isSuccess; // false
+final isSuccess = valueSuccess.isSuccess; // true
 final isFailure = valueError.isFailure; // false
 print('Data of value : ${valueSuccess.data}'); // Data of value : 1
 ```
@@ -51,15 +51,30 @@ valueInitial.map(
 );
 ```
 
+#### Map the value to a different type using pattern matching
+
+```dart
+final result = switch(valueInitial) {
+  Value(isInitial: true) => 'initial',
+  Value(:final dataOnSuccess?) => 'success: $dataOnSuccess',
+  Value(:final error?) => 'failure: $error',
+  _ => 'orElse',
+};
+```
+
 #### Merge two values with different types
 
 ```dart
-value1.merge<int>(value2, mapData: (value) => value.length);
+const valueInt = Value.success(0);
+const valueStr = Value.success('toto');
+final newValue = valueInt.merge(valueStr, mapData: (value) => value.length);
+print('$newValue'); // Value<int>(state: ValueState.success, isFetching: false, data: 4)
 ```
 
 #### Value error
 
-Map a Value to `failure` with actual data if any. There is no `Value.failure` constructor to prevent developers from forgetting to retain the data from a previous state of the Value.
+Map a Value to `failure` with actual data if any. There is no `Value.failure` constructor to prevent developers from forgetting to retain the data from a previous state of the [Value].
+
 ```dart
 final valueError = Value.initial().toFailure(Exception('error'));
 
@@ -86,6 +101,10 @@ value.fetchFrom(() async => "result").forEach(print);
 // Value<String>(state: ValueState.initial, isFetching: true)
 // Value<String>(state: ValueState.success, isFetching: false, data: result)
 ```
+
+### ⚙️ Migration
+
+If you previously used [value_cubit](https://pub.dev/packages/value_cubit) or [flutter_value_state](https://pub.dev/packages/flutter_value_state), please refer to the [example with Cubit](https://github.com/devobs/value_state/blob/main/packages/value_state/example/lib/main_cubit.dart) or the [basic example](https://github.com/devobs/value_state/blob/main/packages/value_state/example/lib/main.dart) for guidance.
 
 ### License
 
